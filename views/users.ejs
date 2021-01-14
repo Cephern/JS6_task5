@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home | Users</title>
+    <link rel="stylesheet" href="users.css" />
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li>
+          <a href="/users">Homepage</a>
+        </li>
+        <li><a href="/users/create">Create User</a></li>
+      </ul>
+    </nav>
+
+    <div class="users">
+      <h2>Users</h2>
+      <ul>
+        <% users.forEach(user => { %>
+        <div class="wrapper" data-doc="<%= user._id %>">
+          <li>
+            <div class="inner">
+              <p>
+                <span class="blue">Login: </span
+                ><span class="login"><%= user.login %></span>
+              </p>
+              <p>
+                <span class="green">Password: </span
+                ><span class="password"><%= user.password %></span>
+              </p>
+            </div>
+            <div class="btns">
+              <a class="delete" data-id="<%= user._id %>">Delete</a>
+              <a class="update">Modify</a>
+            </div>
+          </li>
+        </div>
+        <% }) %>
+      </ul>
+    </div>
+
+    <script>
+      const deleteBtns = document.querySelectorAll("a.delete");
+
+      deleteBtns.forEach((btn) =>
+        btn.addEventListener("click", () => {
+          const endpoint = `/users/${btn.dataset.id}`;
+
+          fetch(endpoint, {
+            method: "DELETE",
+          })
+            .then((res) => res.json())
+            .then((data) => (window.location.href = data.redirect))
+            .catch((err) => console.log(err));
+        })
+      );
+
+      const modifyBtns = document.querySelectorAll("a.update");
+
+      modifyBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const wrapper = document.querySelector(".wrapper");
+
+          const container = document.createElement("div");
+
+          const id = btn.parentElement.parentElement.parentElement.dataset.doc;
+
+          const login = btn.parentElement.parentElement.querySelector(".login")
+            .innerText;
+
+          const password = btn.parentElement.parentElement.querySelector(
+            ".password"
+          ).innerText;
+
+          container.innerHTML = `
+        <form class="modal" method="POST" action="/users/${id}">
+            <div class="front">
+              <h3>Change Users Password</h3>
+              <p>User ${login}</p>
+              <p>Previous Password: ${password}</p>
+              <label for="password">New Password: </label>
+              <input type="text" name="password" />
+              <button class="update">Update</button>
+
+              <span class="close">X</span>
+            </div>
+          </form>
+        `;
+
+          container.querySelector(".close").addEventListener("click", () => {
+            container.innerHTML = "";
+          });
+
+          wrapper.appendChild(container);
+        });
+      });
+    </script>
+  </body>
+</html>
